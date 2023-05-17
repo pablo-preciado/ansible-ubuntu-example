@@ -1,0 +1,26 @@
+- name: Add info to index.html file
+  hosts: datacenter
+  become: true
+
+  vars:
+    http_host: JLR
+    my_things:
+      - '<p> This is the very first line I want to add to my website'
+      - '<p> Second line here'
+      - '<p>Third'
+      - '<p> ...'
+      - '<p> As many as you may want'
+
+  tasks:
+
+    - name: Add info to show in the website
+      loop: "{{ my_things }}"
+      ansible.builtin.lineinfile:
+        path: "/var/www/{{ http_host }}/index.html"
+        insertbefore: '^   </body>'
+        line: "{{ item }}"
+
+    - name: restart-apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
