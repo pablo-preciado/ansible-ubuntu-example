@@ -22,13 +22,13 @@
         mode: '0777'
 
     - name: Copy your index file
-      template:
-        src: "index-template.html"
+      ansible.builtin.template:
+        src: "templates/index-template.html"
         dest: "/var/www/{{ http_host }}/index.html"
 
     - name: Set up virtuahHost
       ansible.builtin.template:
-        src: "apache-template.conf"
+        src: "templates/apache-template.conf"
         dest: "/etc/apache2/sites-available/{{ http_conf }}"
 
     - name: Enable site
