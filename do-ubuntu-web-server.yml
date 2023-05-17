@@ -1,0 +1,67 @@
+- hosts: datacenter
+  become: true
+
+  vars:
+    http_port: 80
+    http_host: whatever
+
+  tasks:
+
+    - name: install apache2 package
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+
+    - name: start apache2 server
+      ansible.builtin.service:
+        name: apache2
+        enabled: true
+        state: started
+
+    - name: create /var/www/demo/ directory
+      ansible.builtin.file:
+        path: /var/www/demo
+        state: directory
+        mode: '0777'
+
+#you could run next two task with a single "ansible.builtin.copy" task but it's less intuitive
+
+    - name: create /var/www/demo/index.html file
+      ansible.builtin.file:
+        path: /var/www/demo/index.html
+        state: touch
+
+    - name: insert content to file /var/www/demo/index.html
+      ansible.builtin.blockinfile:
+        path: /var/www/demo/index.html
+        block: |
+          <html>
+          <head>
+            <title> RHEL rocks! </title>
+          </head>
+          <body>
+            <p> RHEL rocks, sadly this site is running on Ubuntu :(
+          </body>
+          </html>
+
+    - name: Set up virtuahHost
+      ansible.builtin.template:
+        src: "apache-template.conf"
+        dest: "/etc/apache2/sites-available/demo.conf"
+ 
+    - name: Enable site
+      command: a2ensite demo.conf
+      notify: restart-apache
+ 
+#    - name: UFW firewall allow HTTP on port 80
+#      community.general.ufw:
+#        rule: allow
+#        port: 80
+#        proto: tcp
+ 
+  handlers:
+
+    - name: restart-apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
