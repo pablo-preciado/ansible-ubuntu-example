@@ -1,9 +1,11 @@
-- hosts: datacenter
+- name: Delete config and uninstall Apache2 in Ubuntu servers
+  hosts: datacenter
   become: true
 
   vars:
     http_port: 80
     http_host: whatever
+    http_conf: whatever.conf
 
   tasks:
 
@@ -13,28 +15,22 @@
         enabled: false
         state: stopped
 
-    - name: delete /var/www/demo/index.html file
+    - name: "delete /var/www/{{ http_host }}/index.html file"
       ansible.builtin.file:
-        path: /var/www/demo/index.html
+        path: "/var/www/{{ http_host }}/index.html"
         state: absent
 
-    - name: delete /var/www/demo/ directory
+    - name: "delete /var/www/{{ http_host }}/ directory"
       ansible.builtin.file:
-        path: /var/www/demo
+        path: "/var/www/{{ http_host }}"
         state: absent
 
-    - name: delete /etc/apache2/sites-available/demo.conf
+    - name: "delete /etc/apache2/sites-available/{{ http_conf }}"
       ansible.builtin.file:
-        path: /etc/apache2/sites-available/demo.conf
+        path: "/etc/apache2/sites-available/{{ http_conf }}"
         state: absent
 
     - name: uninstall apache2 package
       ansible.builtin.apt:
         name: apache2
         state: absent
-
-#    - name: UFW firewall allow HTTP on port 80
-#      community.general.ufw:
-#        rule: allow
-#        port: 80
-#        proto: tcp
