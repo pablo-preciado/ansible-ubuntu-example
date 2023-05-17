@@ -4,8 +4,8 @@
 
   vars:
     http_port: 80
-    http_host: whatever
-    http_conf: whatever.conf
+    http_host: JLR
+    http_conf: jlr.conf
 
   tasks:
 
