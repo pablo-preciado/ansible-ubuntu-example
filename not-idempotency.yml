@@ -1,0 +1,11 @@
+- name: Demostrate NOT idempotency
+  hosts: ubuntu-4
+  become: true
+  
+  tasks:
+
+    - name: "FIRST TASKT: Create /tmp/idempotency-example directory"
+      command: mkdir /tmp/idempotency-example directory
+
+    - name: "SECOND TASK: Create /tmp/idempotency-example directory"
+      command: mkdir /tmp/idempotency-example directory
