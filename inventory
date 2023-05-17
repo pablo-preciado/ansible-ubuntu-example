@@ -1,0 +1,11 @@
+[dev]
+ubuntu-1 ansible_host=1.2.3.4 ansible_user=ansible ansible_sudo_pass=mypassword
+ubuntu-2 ansible_host=5.6.7.8 ansible_user=ansible ansible_sudo_pass=mypassword
+
+[prod]
+ubuntu-3 ansible_host=9.10.11.12 ansible_user=ansible ansible_sudo_pass=mypassword
+ubuntu-4 ansible_host=13.14.15.16 ansible_user=ansible ansible_sudo_pass=mypassword
+
+[datacenter:children]
+dev
+prod
