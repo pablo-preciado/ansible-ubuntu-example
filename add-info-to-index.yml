@@ -1,5 +1,5 @@
 - name: Add info to index.html file
-  hosts: datacenter
+  hosts: dev
   become: true
 
   vars:
