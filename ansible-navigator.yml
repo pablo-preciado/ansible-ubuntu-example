@@ -1,0 +1,7 @@
+ansible-navigator:
+  execution-environment:
+    pull:
+      policy: missing
+  playbook-artifact:
+    enable: false
+  mode: stdout
