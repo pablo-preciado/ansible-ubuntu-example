@@ -3,6 +3,7 @@
        <title>{{ http_host }}</title>
    </head>
    <body>
-       <h1>Welcome to {{ http_host }}</h1>
+       <h1>Welcome to {{ http_host }} website</h1>
+       <p> This server hostname is {{ ansible_facts['hostname'] }} and the IP address is {{ ansible_facts['default_ipv4']['address'] }}
    </body>
 </html>
