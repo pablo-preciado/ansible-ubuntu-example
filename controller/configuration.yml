@@ -1,0 +1,215 @@
+- hosts: localhost
+  become: yes
+  gather_facts: no
+
+  vars:
+    my_controller_fqdn: yourfqdn
+    my_controller_user: yourcontrolleruser
+    my_controller_pass: yourcontrollerpassword
+    my_customer_name: yourcustomername
+    my_git_url: https://github.com/pablo-preciado/ansible-ubuntu-example.git
+    my_ubuntu_user: userformanagedubuntus
+    my_ubuntu_pass: passwordformanagedubuntut
+    my_ubuntu_servers:
+      - name: ubuntu-1
+        ip: 1.2.3.4
+      - name: ubuntu-2
+        ip: 5.6.7.8
+      - name: ubuntu-3
+        ip: 9.10.11.12
+      - name: ubuntu-4
+        ip: 13.14.15.16.17
+
+  tasks:
+
+   - name: 'Create "{{ my_customer_name }} organization"'
+     ansible.controller.organization:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       name: "{{ my_customer_name }} Organization"
+       state: present
+
+   - name: 'Create Machine Credentials for Ubuntu servers'
+     ansible.controller.credential:
+       name: Target host credentials
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       organization: "{{ my_customer_name }} Organization"
+       state: present
+       credential_type: Machine
+       inputs:
+         username: "{{ my_ubuntu_user }}"
+         password: "{{ my_ubuntu_pass }}"
+         #become_method: sudo
+         #become_username: "{{ my_ubuntu_user }}"
+         #become_password: "{{ my_ubuntu_pass }}"
+
+   - name: 'Add "My Ubuntu demo" inventory'
+     ansible.controller.inventory:
+       name: "My Ubuntu demo inventory"
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       organization: "{{ my_customer_name }} Organization"
+       state: present
+
+   - name: Add host to inventory
+     loop: "{{ my_ubuntu_servers }}"
+     ansible.controller.host:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       name: "{{ item.name }}"
+       description: "Target host for Ubuntu demo"
+       inventory: "My Ubuntu demo inventory"
+       state: present
+       variables:
+         ansible_host: "{{ item.ip }}"
+         ansible_user: ansible
+         ansible_sudo_pass: redhat
+
+   - name: 'Add "dev" group'
+     ansible.controller.group:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       name: dev
+       description: "Development host group"
+       inventory: "My Ubuntu demo inventory"
+       hosts:
+         - ubuntu-1
+         - ubuntu-2
+
+   - name: 'Add "prod" group'
+     ansible.controller.group:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       name: prod
+       description: "Production host group"
+       inventory: "My Ubuntu demo inventory"
+       hosts:
+         - ubuntu-3
+         - ubuntu-4
+
+   - name: 'Add "datacenter" group'
+     ansible.controller.group:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       name: datacenter
+       description: "Datacenter host group"
+       inventory: "My Ubuntu demo inventory"
+       children:
+         - dev
+         - prod
+
+   - name: 'Add "My Ubuntu demo" project'
+     ansible.controller.project:
+       name: "My Ubuntu demo project"
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       organization: "{{ my_customer_name }} Organization"
+       scm_type: git
+       scm_url: "{{ my_git_url }}"
+       scm_update_on_launch: True
+       scm_clean: yes
+       scm_delete_on_update: yes
+       scm_update_cache_timeout: 0
+       default_environment: "Default execution environment"
+       state: present
+
+   - name: 'Launch a "My Ubuntu demo project" update'
+     ansible.controller.project_update:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       organization: "{{ my_customer_name }} Organization"
+       project: "My Ubuntu demo project"
+
+   - name: 'Create "Ubuntu demo - deploy web servers" job template'
+     ansible.controller.job_template:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       name: "Ubuntu demo - deploy web servers"
+       job_type: "run"
+       organization: "{{ my_customer_name }} Organization"
+       inventory: "My Ubuntu demo inventory"
+       project: "My Ubuntu demo project"
+       playbook: "do-ubuntu-web-server.yml"
+       credentials: "Target host credentials"
+       state: "present"
+
+   - name: 'Create "Ubuntu demo - undeploy web servers" job template'
+     ansible.controller.job_template:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       name: "Ubuntu demo - undeploy web servers"
+       job_type: "run"
+       organization: "{{ my_customer_name }} Organization"
+       inventory: "My Ubuntu demo inventory"
+       project: "My Ubuntu demo project"
+       playbook: "undo-ubuntu-web-server.yml"
+       credentials: "Target host credentials"
+       state: "present"
+
+   - name: 'Create "Ubuntu demo - add info to web servers" job template'
+     ansible.controller.job_template:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       name: "Ubuntu demo - add info to web servers"
+       job_type: "run"
+       organization: "{{ my_customer_name }} Organization"
+       inventory: "My Ubuntu demo inventory"
+       project: "My Ubuntu demo project"
+       playbook: "add-info-to-index.yml"
+       credentials: "Target host credentials"
+       state: "present"
+
+   - name: 'Create "Ubuntu demo - demonstrate idempotency" job template'
+     ansible.controller.job_template:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       name: "Ubuntu demo - demonstrate idempotency"
+       job_type: "run"
+       organization: "{{ my_customer_name }} Organization"
+       inventory: "My Ubuntu demo inventory"
+       project: "My Ubuntu demo project"
+       playbook: "idempotency.yml"
+       credentials: "Target host credentials"
+       state: "present"
+
+   - name: 'Create "Ubuntu demo - fail idempotency" job template'
+     ansible.controller.job_template:
+       controller_host: "{{ my_controller_fqdn }}"
+       controller_username: "{{ my_controller_user }}"
+       controller_password: "{{ my_controller_pass }}"
+       validate_certs: no
+       name: "Ubuntu demo - fail idempotency"
+       job_type: "run"
+       organization: "{{ my_customer_name }} Organization"
+       inventory: "My Ubuntu demo inventory"
+       project: "My Ubuntu demo project"
+       playbook: "not-idempotency.yml"
+       credentials: "Target host credentials"
+       state: "present"
