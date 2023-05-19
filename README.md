@@ -1,8 +1,6 @@
 # ansible-ubuntu-example
 An example of what can Ansible do when automating Ubuntu environments
 
-# WIP
-
 ## How to use
 
 Install ansible-navigator in a RHEL machine that has access to your Ubuntu systems.
@@ -33,3 +31,12 @@ ansible-navigator run idempotency.yml
 ansible-navigator run not-idempotency.yml
 ```
 Look at the content of those two playbooks, see that the "command" module is not idempotent while the "file" module is idempotent. That explains the different behaviour of two playbooks that apparently are doing the same tasks.
+
+## Using controller
+
+If you're using Automation Controller you can use the controller/configuration.yml playbook to automatically configure your Automation Controller for running this demo.
+
+First you need to change the values on "vars" section of controller/configuration.yml. Then you just need to run the playbook:
+```
+ansible-navigator run controller/configuration.yml
+```
