@@ -4,14 +4,14 @@
 
   tasks:
 
-    - name: "FIRST TASKT: Create /tmp/idempotency-example directory"
+    - name: "FIRST TASKT: Create /tmp/idempotency-example-directory"
       ansible.builtin.file:
-        path: "Create /tmp/idempotency-example directory"
+        path: "/tmp/idempotency-example-directory"
         state: directory
         mode: '0777'
 
-    - name: "SECOND TASK: Create /tmp/idempotency-example directory"
+    - name: "SECOND TASK: Create /tmp/idempotency-example-directory"
       ansible.builtin.file:
-        path: "Create /tmp/idempotency-example directory"
+        path: "/tmp/idempotency-example-directory"
         state: directory
         mode: '0777'
