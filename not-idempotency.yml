@@ -5,7 +5,7 @@
   tasks:
 
     - name: "FIRST TASKT: Create /tmp/idempotency-example directory"
-      command: mkdir /tmp/idempotency-example directory
+      command: mkdir /tmp/idempotency-example-directory
 
     - name: "SECOND TASK: Create /tmp/idempotency-example directory"
-      command: mkdir /tmp/idempotency-example directory
+      command: mkdir /tmp/idempotency-example-directory
